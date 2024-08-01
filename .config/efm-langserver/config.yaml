@@ -1,0 +1,56 @@
+version: 2
+
+root-markers:
+  - .git/
+
+lint-debounce: 1s
+
+tools:
+  mix_credo: &mix_credo
+    lint-command: "MIX_ENV=test mix credo suggest --format=flycheck --read-from-stdin ${INPUT}"
+    lint-stdin: true
+    lint-formats:
+      - '%f:%l:%c: %t: %m'
+      - '%f:%l: %t: %m'
+    lint-category-map:
+      D: I
+      F: E
+      R: N
+      W: W
+    root-markers:
+      - mix.lock
+      - mix.exs
+  css-prettier: &css-prettier
+    format-command: './node_modules/.bin/prettier ${--tab-width:tabWidth} ${--single-quote:singleQuote} --parser css'
+  html-prettier: &html-prettier
+    format-command: './node_modules/.bin/prettier ${--tab-width:tabWidth} ${--single-quote:singleQuote} --parser html'
+  prettierd: &prettierd
+    format-command: >
+      prettierd ${INPUT} ${--range-start=charStart} ${--range-end=charEnd} \
+        ${--tab-width=tabSize}
+    format-stdin: true
+    root-markers:
+      - .prettierrc
+      - .prettierrc.json
+      - .prettierrc.js
+      - .prettierrc.yml
+      - .prettierrc.yaml
+      - .prettierrc.json5
+      - .prettierrc.mjs
+      - .prettierrc.cjs
+      - .prettierrc.toml
+  python-black: &python-black
+    format-command: 'black --quiet -'
+    format-stdin: true
+
+languages:
+  css:
+    - <<: *css-prettier
+  elixir:
+    - <<: *mix_credo
+  html:
+    - <<: *html-prettier
+  javascript:
+    - <<: *prettierd
+  python:
+    - <<: *python-black
